@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 API Teaching Assistant - Interactive ML Demo</title>
+    <title>🎓 API Demo</title>
     <style>
         * {
             margin: 0;
@@ -369,7 +369,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎓 API Teaching Assistant</h1>
+            <h1>DEMO</h1>
             <p>Interactive ML Demo + Professional Teaching Assistant for API Fundamentals</p>
         </div>
         
@@ -378,7 +378,10 @@
             <div class="section">
                 <h2>API Demo</h2>
                 
-                
+<!--                 <div class="api-info">
+                    <strong>🎯 Learning Focus:</strong> Practical ML API Development<br>
+                    <strong>📖 Documentation:</strong> <a href="#" target="_blank" id="docsLink">View API Docs</a>
+                </div> -->
                 
                 <form id="predictionForm">
                     <div class="form-group">
@@ -420,7 +423,7 @@
                     </div>
                     
                     <button type="submit" class="btn" id="predictBtn">
-                        Predict House Price
+                        🎯 Predict House Price
                     </button>
                 </form>
                 
@@ -433,7 +436,7 @@
                 
                 <div class="api-info">
                     <strong>🎓 Subject:</strong> API Fundamentals & FastAPI<br>
-                    <strong>🧠 Powered by:</strong> AI + Comprehensive Course Materials
+                    <strong>🧠 Powered by:</strong> AI + Comprehensive Session Materials
                 </div>
                 
                 <!-- Teaching Assistant Status -->
@@ -520,20 +523,40 @@
             const docsLink = document.getElementById('docsLink');
             
             // Update docs link
-            docsLink.href = `${API_BASE_URL}/docs`;
+            if (docsLink) {
+                docsLink.href = `${API_BASE_URL}/docs`;
+            }
             
             try {
-                // Check overall health
-                const healthResponse = await fetch(`${API_BASE_URL}/health`);
+                console.log('Checking teaching status...');
+                
+                // Check overall health with proper headers for ngrok
+                const healthResponse = await fetch(`${API_BASE_URL}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+                
+                console.log('Health response status:', healthResponse.status);
                 const healthResult = await healthResponse.json();
+                console.log('Health result:', healthResult);
                 
                 if (healthResponse.ok) {
                     const allSystemsReady = healthResult.ready_for_teaching;
                     teachingSystemReady = allSystemsReady;
                     
                     // Check teaching info
-                    const teachingResponse = await fetch(`${API_BASE_URL}/teaching-info`);
+                    const teachingResponse = await fetch(`${API_BASE_URL}/teaching-info`, {
+                        method: 'GET',
+                        headers: {
+                            'ngrok-skip-browser-warning': 'true'
+                        }
+                    });
+                    
+                    console.log('Teaching response status:', teachingResponse.status);
                     const teachingResult = await teachingResponse.json();
+                    console.log('Teaching result:', teachingResult);
                     
                     if (teachingResponse.ok && teachingResult.loaded) {
                         chatMessage.disabled = false;
@@ -548,14 +571,14 @@
                                 📚 Subject: ${teachingResult.subject}<br>
                                 📄 Content Sections: ${teachingResult.total_sections}<br>
                                 🔍 Search: ${teachingResult.search_capabilities}<br>
-                                🤖 AI Model: ${healthResult.services.teaching_assistant ? 'Ready' : 'Not Ready'}<br>
-                                🏠 Demo API: ${healthResult.services.house_model ? ' Ready' : ' Not Ready'}
+                                🤖 AI Model: ${healthResult.services.teaching_assistant ? '✅ Ready' : '❌ Not Ready'}<br>
+                                🏠 Demo API: ${healthResult.services.house_model ? '✅ Ready' : '❌ Not Ready'}
                             </div>
                         `;
                         
                         // Add ready message to chat if not already added
                         if (!document.querySelector('.chat-ready-message')) {
-                            addMessageToChat('system', `Teaching Assistant is ready! I have access to comprehensive materials on "${teachingResult.subject}" with ${teachingResult.total_sections} content sections. Ask me anything about APIs, FastAPI, or today's session!`, 'chat-ready-message');
+                            addMessageToChat('system', `🎉 Teaching Assistant is ready! I have access to comprehensive materials on "${teachingResult.subject}" with ${teachingResult.total_sections} content sections. Ask me anything about APIs, FastAPI, or today's session!`, 'chat-ready-message');
                         }
                     } else {
                         chatMessage.disabled = true;
@@ -568,8 +591,8 @@
                             </div>
                             <div style="font-size: 14px; color: #666; margin-top: 8px;">
                                 ${teachingResult.message || 'Teaching materials are being prepared'}<br>
-                                AI Model: ${healthResult.services.teaching_assistant ? 'Ready' : 'Not Ready'}<br>
-                                Demo API: ${healthResult.services.house_model ? 'Ready' : 'Not Ready'}
+                                🤖 AI Model: ${healthResult.services.teaching_assistant ? '✅ Ready' : '❌ Not Ready'}<br>
+                                🏠 Demo API: ${healthResult.services.house_model ? '✅ Ready' : '❌ Not Ready'}
                             </div>
                         `;
                     }
@@ -577,6 +600,7 @@
                     throw new Error(`Health check failed: ${healthResult.detail || 'Unknown error'}`);
                 }
             } catch (error) {
+                console.error('Teaching status check failed:', error);
                 teachingSystemReady = false;
                 chatMessage.disabled = true;
                 chatBtn.disabled = true;
@@ -617,6 +641,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify(formData)
                 });
@@ -655,7 +680,7 @@
                 } else {
                     resultDiv.innerHTML = `
                         <div class="result error">
-                            <h3>API Error</h3>
+                            <h3>❌ API Error</h3>
                             <p>${result.detail || 'Unknown error occurred'}</p>
                             <p style="font-size: 14px; margin-top: 10px;">This demonstrates proper error handling in API responses.</p>
                         </div>
@@ -664,7 +689,7 @@
             } catch (error) {
                 document.getElementById('predictionResult').innerHTML = `
                     <div class="result error">
-                        <h3>Network Error</h3>
+                        <h3>❌ Network Error</h3>
                         <p>Could not connect to the API backend.</p>
                         <p><strong>Error:</strong> ${error.message}</p>
                         <p style="font-size: 14px; margin-top: 10px;">This shows how frontend handles network failures.</p>
@@ -681,7 +706,7 @@
             e.preventDefault();
             
             if (!teachingSystemReady) {
-                addMessageToChat('system', 'Teaching Assistant is not ready yet. Please wait for the system to initialize or check the status.');
+                addMessageToChat('system', '⚠️ Teaching Assistant is not ready yet. Please wait for the system to initialize or check the status.');
                 return;
             }
             
@@ -701,17 +726,22 @@
             chatBtn.disabled = true;
 
             try {
+                console.log('Sending question to teaching assistant:', message);
+                
                 const response = await fetch(`${API_BASE_URL}/ask`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify({
                         question: message
                     })
                 });
 
+                console.log('Teaching assistant response status:', response.status);
                 const result = await response.json();
+                console.log('Teaching assistant result:', result);
 
                 if (response.ok && result.success) {
                     let assistantMessage = result.answer;
@@ -728,10 +758,11 @@
                     
                     addMessageToChat('ai', assistantMessage);
                 } else {
-                    addMessageToChat('ai', `Teaching Assistant Error: ${result.detail || 'Failed to get response'}`);
+                    addMessageToChat('ai', `❌ Teaching Assistant Error: ${result.detail || 'Failed to get response'}`);
                 }
             } catch (error) {
-                addMessageToChat('ai', `Connection Error: Could not reach the Teaching Assistant. Please check your connection and try again.`);
+                console.error('Teaching assistant error:', error);
+                addMessageToChat('ai', `❌ Connection Error: Could not reach the Teaching Assistant. Please check your connection and try again.`);
             } finally {
                 chatBtn.innerHTML = originalText;
                 chatBtn.disabled = !teachingSystemReady;
@@ -763,8 +794,8 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('API Teaching Assistant Frontend initialized!');
-            console.log('Backend API: ' + API_BASE_URL);
+            console.log('🎓 API Teaching Assistant Frontend initialized!');
+            console.log('📡 Backend API: ' + API_BASE_URL);
             
             // Check teaching status on load
             checkTeachingStatus();
