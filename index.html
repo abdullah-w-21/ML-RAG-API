@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎓 API Teaching Assistant - Interactive ML Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2C3E50, #3498DB);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 700px;
+        }
+
+        .section {
+            padding: 40px;
+            border-right: 1px solid #eee;
+        }
+
+        .section:last-child {
+            border-right: none;
+        }
+
+        .section h2 {
+            color: #2C3E50;
+            margin-bottom: 30px;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .form-group input, 
+        .form-group textarea, 
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498DB;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498DB, #2980B9);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            margin-top: 10px;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 12px;
+            font-weight: 500;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result.success {
+            background: linear-gradient(135deg, #d5f4e6, #c8e6c9);
+            border: 2px solid #4caf50;
+            color: #1b5e20;
+        }
+
+        .result.error {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            border: 2px solid #f44336;
+            color: #c62828;
+        }
+
+        .result.info {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #2196f3;
+            color: #0d47a1;
+        }
+
+        .chat-container {
+            height: 450px;
+            overflow-y: auto;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            animation: messageSlide 0.3s ease;
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            text-align: right;
+            border-left: 4px solid #2196F3;
+        }
+
+        .message.ai {
+            background: linear-gradient(135deg, #F5F5F5, #EEEEEE);
+            border-left: 4px solid #4CAF50;
+        }
+
+        .message.system {
+            background: linear-gradient(135deg, #FFF3E0, #FFCC02);
+            border-left: 4px solid #FF9800;
+            font-style: italic;
+        }
+
+        .message strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .sources {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .teaching-info {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .teaching-info h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498DB;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .price-breakdown {
+            background: #f8f9ff;
+            border: 2px solid #6c5ce7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .price-breakdown h4 {
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.online {
+            background: #4caf50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+        }
+
+        .status-indicator.offline {
+            background: #f44336;
+        }
+
+        .status-indicator.loading {
+            background: #ff9800;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .api-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-question {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-question:hover {
+            background: #2196f3;
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .section:last-child {
+                border-bottom: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .section {
+                padding: 30px 20px;
+            }
+
+            .chat-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 API Teaching Assistant</h1>
+            <p>Interactive ML Demo + Professional Teaching Assistant for API Fundamentals</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- House Price Prediction Section -->
+            <div class="section">
+                <h2>API Demo</h2>
+                
+                
+                
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label for="bedrooms">Number of Bedrooms:</label>
+                        <select id="bedrooms" required>
+                            <option value="1">1 Bedroom</option>
+                            <option value="2">2 Bedrooms</option>
+                            <option value="3" selected>3 Bedrooms</option>
+                            <option value="4">4 Bedrooms</option>
+                            <option value="5">5 Bedrooms</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bathrooms">Number of Bathrooms:</label>
+                        <select id="bathrooms" required>
+                            <option value="1">1 Bathroom</option>
+                            <option value="2" selected>2 Bathrooms</option>
+                            <option value="3">3 Bathrooms</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sqft">Square Footage:</label>
+                        <input type="number" id="sqft" min="800" max="3500" value="1800" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="age">House Age (years):</label>
+                        <input type="number" id="age" min="0" max="50" value="10" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="location_score">Location Score (1-10):</label>
+                        <input type="range" id="location_score" min="1" max="10" value="8" oninput="updateLocationValue(this.value)">
+                        <div style="text-align: center; margin-top: 10px;">
+                            <span id="locationValue">8</span> / 10
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="predictBtn">
+                        Predict House Price
+                    </button>
+                </form>
+                
+                <div id="predictionResult"></div>
+            </div>
+            
+            <!-- AI Teaching Assistant Section -->
+            <div class="section">
+                <h2>🤖 Teaching Assistant</h2>
+                
+                <div class="api-info">
+                    <strong>🎓 Subject:</strong> API Fundamentals & FastAPI<br>
+                    <strong>🧠 Powered by:</strong> AI + Comprehensive Course Materials
+                </div>
+                
+                <!-- Teaching Assistant Status -->
+                <div id="teachingStatus" class="teaching-info">
+                    <h3>📚 Teaching Assistant Status</h3>
+                    <div id="statusContent">
+                        <span class="status-indicator loading"></span>
+                        Connecting to Teaching Assistant...
+                    </div>
+                </div>
+
+                <!-- Quick Questions -->
+                <div class="quick-questions">
+                    <div class="quick-question" onclick="askQuickQuestion('What is FastAPI and why should I use it?')">
+                        FastAPI Basics
+                    </div>
+                    <div class="quick-question" onclick="askQuickQuestion('How do I handle errors in FastAPI?')">
+                        Error Handling
+                    </div>
+                    <div class="quick-question" onclick="askQuickQuestion('What is Pydantic and why is it important?')">
+                        Pydantic Models
+                    </div>
+                    <div class="quick-question" onclick="askQuickQuestion('How do I deploy APIs to production?')">
+                        Deployment
+                    </div>
+                </div>
+                
+                <!-- Chat Interface -->
+                <div id="chatMessages" class="chat-container">
+                    <div class="message system">
+                        <strong>🎓 Teaching Assistant:</strong>
+                        Hello! I'm your AI Teaching Assistant for this API fundamentals session. I have access to comprehensive course materials and can help you understand FastAPI, API design patterns, best practices, and more. Feel free to ask me anything about what you're learning today!
+                    </div>
+                </div>
+                
+                <form id="chatForm">
+                    <div class="form-group">
+                        <textarea 
+                            id="chatMessage" 
+                            placeholder="Ask me about APIs, FastAPI, deployment, best practices, or anything from today's session..." 
+                            rows="3" 
+                            required
+                            disabled
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="btn" id="chatBtn" disabled>
+                        💬 Ask Teaching Assistant
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="refreshBtn" onclick="checkTeachingStatus()">
+                        🔄 Refresh Status
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration 
+        const API_BASE_URL = 'https://api.yourdomain.com';  
+        
+        let teachingSystemReady = false;
+
+        // Update location score display
+        function updateLocationValue(value) {
+            document.getElementById('locationValue').textContent = value;
+        }
+
+        // Quick question functionality
+        function askQuickQuestion(question) {
+            const messageInput = document.getElementById('chatMessage');
+            messageInput.value = question;
+            
+            // Simulate form submission
+            const chatForm = document.getElementById('chatForm');
+            const submitEvent = new Event('submit');
+            chatForm.dispatchEvent(submitEvent);
+        }
+
+        // Check teaching assistant status
+        async function checkTeachingStatus() {
+            const statusContent = document.getElementById('statusContent');
+            const chatMessage = document.getElementById('chatMessage');
+            const chatBtn = document.getElementById('chatBtn');
+            const docsLink = document.getElementById('docsLink');
+            
+            // Update docs link
+            docsLink.href = `${API_BASE_URL}/docs`;
+            
+            try {
+                // Check overall health
+                const healthResponse = await fetch(`${API_BASE_URL}/health`);
+                const healthResult = await healthResponse.json();
+                
+                if (healthResponse.ok) {
+                    const allSystemsReady = healthResult.ready_for_teaching;
+                    teachingSystemReady = allSystemsReady;
+                    
+                    // Check teaching info
+                    const teachingResponse = await fetch(`${API_BASE_URL}/teaching-info`);
+                    const teachingResult = await teachingResponse.json();
+                    
+                    if (teachingResponse.ok && teachingResult.loaded) {
+                        chatMessage.disabled = false;
+                        chatBtn.disabled = false;
+                        
+                        statusContent.innerHTML = `
+                            <div style="margin-bottom: 15px;">
+                                <span class="status-indicator online"></span>
+                                <strong>Teaching Assistant Ready!</strong>
+                            </div>
+                            <div style="font-size: 14px; color: #555;">
+                                📚 Subject: ${teachingResult.subject}<br>
+                                📄 Content Sections: ${teachingResult.total_sections}<br>
+                                🔍 Search: ${teachingResult.search_capabilities}<br>
+                                🤖 AI Model: ${healthResult.services.teaching_assistant ? 'Ready' : 'Not Ready'}<br>
+                                🏠 Demo API: ${healthResult.services.house_model ? ' Ready' : ' Not Ready'}
+                            </div>
+                        `;
+                        
+                        // Add ready message to chat if not already added
+                        if (!document.querySelector('.chat-ready-message')) {
+                            addMessageToChat('system', `Teaching Assistant is ready! I have access to comprehensive materials on "${teachingResult.subject}" with ${teachingResult.total_sections} content sections. Ask me anything about APIs, FastAPI, or today's session!`, 'chat-ready-message');
+                        }
+                    } else {
+                        chatMessage.disabled = true;
+                        chatBtn.disabled = true;
+                        
+                        statusContent.innerHTML = `
+                            <div>
+                                <span class="status-indicator offline"></span>
+                                <strong>Teaching Materials Loading...</strong>
+                            </div>
+                            <div style="font-size: 14px; color: #666; margin-top: 8px;">
+                                ${teachingResult.message || 'Teaching materials are being prepared'}<br>
+                                AI Model: ${healthResult.services.teaching_assistant ? 'Ready' : 'Not Ready'}<br>
+                                Demo API: ${healthResult.services.house_model ? 'Ready' : 'Not Ready'}
+                            </div>
+                        `;
+                    }
+                } else {
+                    throw new Error(`Health check failed: ${healthResult.detail || 'Unknown error'}`);
+                }
+            } catch (error) {
+                teachingSystemReady = false;
+                chatMessage.disabled = true;
+                chatBtn.disabled = true;
+                
+                statusContent.innerHTML = `
+                    <div>
+                        <span class="status-indicator offline"></span>
+                        <strong>Connection Failed</strong>
+                    </div>
+                    <div style="font-size: 14px; color: #666; margin-top: 8px;">
+                        Could not connect to the Teaching Assistant API.<br>
+                        Please check if the service is running.<br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Handle House Price Prediction
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const predictBtn = document.getElementById('predictBtn');
+            const originalText = predictBtn.innerHTML;
+            predictBtn.innerHTML = '<span class="loading"></span>Predicting...';
+            predictBtn.disabled = true;
+            
+            const formData = {
+                bedrooms: parseInt(document.getElementById('bedrooms').value),
+                bathrooms: parseInt(document.getElementById('bathrooms').value),
+                sqft: parseInt(document.getElementById('sqft').value),
+                age: parseInt(document.getElementById('age').value),
+                location_score: parseInt(document.getElementById('location_score').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('predictionResult');
+                
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>🎉 ML API Response</h3>
+                            <div class="price-breakdown">
+                                <h4>💰 ${result.prediction.formatted_price}</h4>
+                                <div class="price-item">
+                                    <span>Price per sq ft:</span>
+                                    <strong>$${result.prediction.price_per_sqft}</strong>
+                                </div>
+                                <div class="price-item">
+                                    <span>Category:</span>
+                                    <strong>${result.prediction.category}</strong>
+                                </div>
+                                <div class="price-item">
+                                    <span>Model Type:</span>
+                                    <strong>${result.model_info.type}</strong>
+                                </div>
+                                <div class="price-item">
+                                    <span>Service:</span>
+                                    <strong>${result.service}</strong>
+                                </div>
+                            </div>
+                            <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                                ${result.educational_note}
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>API Error</h3>
+                            <p>${result.detail || 'Unknown error occurred'}</p>
+                            <p style="font-size: 14px; margin-top: 10px;">This demonstrates proper error handling in API responses.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('predictionResult').innerHTML = `
+                    <div class="result error">
+                        <h3>Network Error</h3>
+                        <p>Could not connect to the API backend.</p>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p style="font-size: 14px; margin-top: 10px;">This shows how frontend handles network failures.</p>
+                    </div>
+                `;
+            } finally {
+                predictBtn.innerHTML = originalText;
+                predictBtn.disabled = false;
+            }
+        });
+
+        // Handle Chat with Teaching Assistant
+        document.getElementById('chatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!teachingSystemReady) {
+                addMessageToChat('system', 'Teaching Assistant is not ready yet. Please wait for the system to initialize or check the status.');
+                return;
+            }
+            
+            const messageInput = document.getElementById('chatMessage');
+            const message = messageInput.value.trim();
+            const chatBtn = document.getElementById('chatBtn');
+            
+            if (!message) return;
+
+            // Add user message to chat
+            addMessageToChat('user', message);
+            
+            // Clear input and disable button
+            messageInput.value = '';
+            const originalText = chatBtn.innerHTML;
+            chatBtn.innerHTML = '<span class="loading"></span>Teaching Assistant thinking...';
+            chatBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/ask`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: message
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    let assistantMessage = result.answer;
+                    
+                    // Add sources if available
+                    if (result.sources && result.sources.length > 0) {
+                        assistantMessage += `<div class="sources"><strong>📚 Teaching Materials Referenced:</strong> ${result.sources.join(', ')}</div>`;
+                    }
+                    
+                    // Add context info
+                    if (result.context_used && result.relevant_sections > 0) {
+                        assistantMessage += `<div style="font-size: 12px; color: #666; margin-top: 8px;">Referenced ${result.relevant_sections} relevant sections from course materials (${result.session_topic})</div>`;
+                    }
+                    
+                    addMessageToChat('ai', assistantMessage);
+                } else {
+                    addMessageToChat('ai', `Teaching Assistant Error: ${result.detail || 'Failed to get response'}`);
+                }
+            } catch (error) {
+                addMessageToChat('ai', `Connection Error: Could not reach the Teaching Assistant. Please check your connection and try again.`);
+            } finally {
+                chatBtn.innerHTML = originalText;
+                chatBtn.disabled = !teachingSystemReady;
+            }
+        });
+
+        function addMessageToChat(sender, message, cssClass = '') {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender} ${cssClass}`;
+            
+            let senderLabel = '';
+            if (sender === 'user') {
+                senderLabel = '👤 You:';
+            } else if (sender === 'ai') {
+                senderLabel = '🎓 Teaching Assistant:';
+            } else {
+                senderLabel = '🔔 System:';
+            }
+            
+            messageDiv.innerHTML = `
+                <strong>${senderLabel}</strong>
+                ${message}
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('API Teaching Assistant Frontend initialized!');
+            console.log('Backend API: ' + API_BASE_URL);
+            
+            // Check teaching status on load
+            checkTeachingStatus();
+            
+            // Check periodically until system is ready
+            const statusChecker = setInterval(() => {
+                if (!teachingSystemReady) {
+                    checkTeachingStatus();
+                } else {
+                    clearInterval(statusChecker);
+                }
+            }, 5000);
+            
+            // Clear interval after 60 seconds to avoid infinite checking
+            setTimeout(() => clearInterval(statusChecker), 60000);
+        });
+    </script>
+</body>
+</html>
